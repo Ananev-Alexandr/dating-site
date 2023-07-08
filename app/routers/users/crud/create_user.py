@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from app.database.models import user_models
 from app.helpers.password import get_password_hash
@@ -19,8 +20,8 @@ def create_user(db: Session, user: UserCreate):
         db.commit()
         db.refresh(db_user)
         return db_user
-    except Exception:
-        raise HTTPException(
-            status_code=404,
-            detail="This username already exists, please use another one"
-                )
+    except IntegrityError as ex:
+            raise HTTPException(
+            status_code=500,
+            detail=f"an unexpected error occurred: {ex}"
+        )
