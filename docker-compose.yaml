@@ -2,7 +2,7 @@ version: "3"
 
 services:
 
-  dating-site:
+  db-dating-site:
     container_name: db-dating-site
     restart: always
     image: postgres
@@ -17,7 +17,30 @@ services:
       retries: 5
       start_period: 10s
     volumes:
-      - dating-site-postgresql-data:/var/lib/postgresql/data/
+      - postgres_data:/var/lib/postgresql/data
+
+  run-migration:
+    container_name: run-migration
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    command: bash -c "alembic upgrade head"
+    ports:
+      - 8000:8000
+    volumes:
+      - run-migration-data:/run-migration-data
+
+  dating-site:
+    container_name: dating-site
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    ports:
+      - 8001:8000
+    volumes:
+      - dating-site-data:/dating-site-data
 
 volumes:
-  dating-site-postgresql-data:
+ postgres_data:
+ run-migration-data:
+ dating-site-data:
